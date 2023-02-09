@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb  7 14:18:38 2023
-
-@author: tymch
-"""
-
 """
 This is an example of a Pymunk/Pygame simulation for a double pendulum coded by Hal.
 Please message me on Discord if you have any questions about the code since I think I understand it all.
