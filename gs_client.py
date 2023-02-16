@@ -18,7 +18,8 @@ def get_Encoder_data(HOST = '147.188.37.23', PORT = 10000):
      # The port used by the server: 10000
     # Call this function when you need the encoder data from the server
     # Output Large_angle_array in degrees (1), Small_angle_array in degrees (4) , time (1) in seconds
-    # For small encoders angles relative to the robot swinging forward - top +, bottom -, bottom +, top - 
+    # For small encoders angles relative to the robot swinging forward - top +, bottom -, bottom +, top -
+    # there is a required sampling rate of 0.1 seconds for getting encoder data   
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
