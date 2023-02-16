@@ -47,7 +47,7 @@ def simdict():
     torso = Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2)
     
     #fixed joints of simulation
-    back = PinJoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))#second needs fixing to first
+    back = PinJoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
     front = PinJoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
     bottom = PinJoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
     top = PinJoint(background, rod.body, setup["bg"], (0,-setup["r2"]/2))
