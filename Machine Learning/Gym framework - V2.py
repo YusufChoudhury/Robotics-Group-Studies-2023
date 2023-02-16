@@ -67,7 +67,7 @@ def setup_simulation(setup_data):
     pm_space.add(pivot_joint)
 
 
-    return {"pm_space":pm_space, "motor_active":motor_active, "timer":timer, "duration":duration, "motor_rate":motor_rate}
+    return {"pm_space":pm_space, "motor_active":motor_active, "timer":timer, "duration":duration, "motor_rate":motor_rate, "pivot_body":pivot_body, "body":body}
 
 def perform_action(action,simulation_data):
     if simulation_data["motor_active"]:
@@ -86,6 +86,7 @@ def perform_action(action,simulation_data):
 def add_motor(simulation_data):
     simulation_data["motor"] = pymunk.SimpleMotor(simulation_data["pivot_body"],simulation_data["body"],simulation_data["motor_rate"])
     simulation_data["pm_space"].add(simulation_data["motor"])
+    return simulation_data
 
 def remove_motor(simulation_data):
     simulation_data["pm_space"].remove(simulation_data["motor"])
