@@ -4,8 +4,14 @@ Created on Thu Feb 16 15:57:46 2023
 
 @author: benkr
 """
+import simulation as sim
+import pymunk, sys
 
 def simdict():
+    space = pymunk.Space()
+    space.gravity = 0, 981
+    background = space.static_body
+    
     motor_active = [False, False]
     timer = [0, 0]
     duration = [0, 0]
@@ -27,7 +33,7 @@ def simdict():
         "rm": 1.235 + 0.381/2,
         "sm1": 0.381/2,
         "sm2": 1.026,
-        "sm3": 0.131*2 + 0.070 +0.390*2,
+        "sm3": 0.131*2 + 0.070 + 0.390*2,
         "lm1": 0.292*2 + 0.134,
         "lm2": 0.162*2 + 0.134,
         "tm": 1.050 + 0.064 + 0.605 + 0.075 + 0.070,
@@ -41,14 +47,14 @@ def simdict():
     }
         
     #these add the object to the simulation
-    rod = Rod(centres["rc"], (0,setup["rl"]/2), (0,-setup["rl"]/2), setup["rm"])
-    swing = Swing(centres["sc"], (0,-setup["sl2"]/2), (setup["sl1"]/2,-setup["sl2"]/2), (0,setup["sl2"]/2), (0,-setup["sl2"]/2), (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (setup["sl3"]/2 -0.5,setup["sl2"]/2), setup["sm1"], setup["sm2"], setup["sm3"])
-    leg = Leg(centres["lc"], (0, -setup["ll1"]/2), (0, setup["ll1"]/2), (0, setup["ll1"]/2), (setup["ll2"], setup["ll1"]/2), etup["lm1"], etup["lm2"])
-    torso = Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2)
+    rod = sim.Rod(centres["rc"], (0,setup["rl"]/2), (0,-setup["rl"]/2), setup["rm"])
+    swing = sim.Swing(centres["sc"], (0,-setup["sl2"]/2), (setup["sl1"]/2,-setup["sl2"]/2), (0,setup["sl2"]/2), (0,-setup["sl2"]/2), (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (setup["sl3"]/2 -0.5,setup["sl2"]/2), setup["sm1"], setup["sm2"], setup["sm3"])
+    leg = sim.Leg(centres["lc"], (0, - setup["ll1"]/2), (0, setup["ll1"]/2), (0, setup["ll1"]/2), (setup["ll2"], setup["ll1"]/2), setup["lm1"], setup["lm2"])
+    torso = sim.Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2)
     
     #fixed joints of simulation
-    back = PinJoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
-    front = PinJoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
-    bottom = PinJoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
-    top = PinJoint(background, rod.body, setup["bg"], (0,-setup["r2"]/2))
+    back = sim.PinJoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
+    front = sim.PinJoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
+    bottom = sim.PinJoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
+    top = sim.PinJoint(background, rod.body, setup["bg"], (0,-setup["r2"]/2))
     return {"pm_space":space, "motor_active":motor_active, "timer":timer, "duration":duration, "motor_rate":motor_rate}
