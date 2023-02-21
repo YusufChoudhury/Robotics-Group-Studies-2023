@@ -15,9 +15,7 @@ import numpy as np
 from PIL import Image
 from pymunk.pygame_util import DrawOptions
 
-space = pymunk.Space()
-space.gravity = 0, 981
-background = space.static_body
+
 
 def angle(x1, x2, y1, y2, theta=0, phi=0):
     'angle between two points, can take away other angles to make it relative to other component'
@@ -28,7 +26,7 @@ def CoM(x1, x2, y1, y2, m1, m2):
     return ((m1*x1 + m2*x2)/2, (m1*y1 + m2*y2)/2)
 
 class Rod:
-    def __init__(self, pos, a, b, m, radius=4):
+    def __init__(self, pos, a, b, m, space, radius=4):
         'position of CoM, start, end, mass, radius(width)'
         self.body = pymunk.Body()
         self.body.position = pos
@@ -44,7 +42,7 @@ class Rod:
         space.add(self.body, self.shape)
 
 class Leg:
-    def __init__(self, pos, a1, b1, a2, b2, m1, m2, radius=3):
+    def __init__(self, pos, a1, b1, a2, b2, m1, m2, space, radius=3):
         'position of CoM, leg_start, leg_end, foot_start, foot_end,'
         ' leg_mass,  foot_mass, radius(width)'
         self.body = pymunk.Body()
@@ -67,14 +65,14 @@ class Leg:
 
 class Rotarylimitjoint:
     'stops swing moving out of control area i think'
-    def __init__(self, b, b2, min, max, collide=True):
+    def __init__(self, b, b2, min, max, space, collide=True):
         joint = pymunk.constraints.RotaryLimitJoint(b, b2, min, max)
         joint.collide_bodies = collide
         space.add(joint)
 
 class Simplemotor:
     'is added and removed at diffrent points to move a joint at a constant speed'
-    def __init__(self, body1, body2, rate=0, switch="off"):
+    def __init__(self, body1, body2, rate, space, switch="off"):
         'rate is angular velocity in radians'
         self.rate = rate
         self.body1 = body1
@@ -85,13 +83,13 @@ class Simplemotor:
         space.remove(self.simplemotor)
 
 class Pinjoint:
-    def __init__(self, body1, body2, con1, con2):
+    def __init__(self, body1, body2, con1, con2, space):
         'two bodies and where to connect them by on each body'
         joint = pymunk.constraints.PinJoint(body1, body2, con1, con2)
         space.add(joint)
 
 class Swing:
-    def __init__(self,pos, a1, b1, a2, b2, a3, b3, m1, m2, m3, radius=10):
+    def __init__(self,pos, a1, b1, a2, b2, a3, b3, m1, m2, m3, space, radius=10):
         'position of CoM, a=start, b=end, m=mass, 1/2/3=bar/vertical/base'
         self.body = pymunk.Body()
         self.body.position = pos
@@ -107,7 +105,7 @@ class Swing:
         space.add(self.body, s1,s2,s3)
 
 class Torso:
-    def __init__(self, pos, a, b, m, radius=3):
+    def __init__(self, pos, a, b, m, space, radius=3):
         'position of CoM, a=start, b=end, m=mass'
         self.body = pymunk.Body()
         self.body.position = pos
@@ -120,7 +118,7 @@ class Torso:
         self.torso.mass = m
         self.torso.color = (255, 0, 0, 0)
         space.add(self.body, self.torso)
-
+'''
 # rod_test = Rod((400 , 500), (0,-100) , (0,100), 5)
 # PinJoint(background, rod_test.body, (400,400), (0,-100))
 
@@ -160,5 +158,5 @@ front = Pinjoint(swing.body, leg.body, (s3/2 -0.5,s2/2), (0, -l1/2))
 bottom = Pinjoint(rod.body, swing.body, (0,r/2), (0,-s2/2))
 top = Pinjoint(background, rod.body, bg, (0,-r/2))
 
-rotation_lim = Rotarylimitjoint(rod.body,swing.body , -np.pi/4, np.pi/4)
+rotation_lim = Rotarylimitjoint(rod.body,swing.body , -np.pi/4, np.pi/4)'''
 

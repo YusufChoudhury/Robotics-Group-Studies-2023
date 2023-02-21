@@ -22,6 +22,8 @@ class CustomEnv(gym.Env):
     def step(self, action=np.zeros((4), dtype=np.single)):
         self.simulation_data = perform_action(action,self.simulation_data)
         self.simulation_data["pm_space"].step(1/1000)
+        print( 180/np.pi*self.simulation_data["pm_space"].bodies[3].angle)
+
         observation, reward, done, info = 0., 0., False, {}
         return observation, reward, done, info
 
@@ -50,6 +52,10 @@ class CustomEnv(gym.Env):
 
 def setup_simulation():
     
+    pm_space = pymunk.Space()
+    pm_space.gravity = 0, 981
+    background = pm_space.static_body
+    
     """lengths - need to be corrected (Nao dimensions)"""
     setup = {
         "rl": 151 + 7,
@@ -70,7 +76,6 @@ def setup_simulation():
         "lm2": 0.162*2 + 0.134,
         "tm": 1.050 + 0.064 + 0.605 + 0.075 + 0.070,
     }
-    print(setup)
     centres = {
         "rc": (setup["bg"][0], setup["bg"][1] + setup["rl"]/2),
         "sc": (setup["bg"][0], setup["bg"][1] + setup["rl"] + setup["sl2"]/2),
@@ -79,32 +84,36 @@ def setup_simulation():
     }
         
     #these add the object to the simulation
-    rod = sim.Rod(centres["rc"], (0,setup["rl"]/2), (0,-setup["rl"]/2), setup["rm"])
-    swing = sim.Swing(centres["sc"], (0,-setup["sl2"]/2), (setup["sl1"]/2,-setup["sl2"]/2), (0,setup["sl2"]/2), (0,-setup["sl2"]/2), (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (setup["sl3"]/2 -0.5,setup["sl2"]/2), setup["sm1"], setup["sm2"], setup["sm3"])
-    leg = sim.Leg(centres["lc"], (0, - setup["ll1"]/2), (0, setup["ll1"]/2), (0, setup["ll1"]/2), (setup["ll2"], setup["ll1"]/2), setup["lm1"], setup["lm2"])
-    torso = sim.Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2)
+    rod = sim.Rod(centres["rc"], (0,setup["rl"]/2), (0,-setup["rl"]/2), setup["rm"], pm_space)
+    swing = sim.Swing(centres["sc"], (0,-setup["sl2"]/2), (setup["sl1"]/2,-setup["sl2"]/2), (0,setup["sl2"]/2), (0,-setup["sl2"]/2), (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (setup["sl3"]/2 -0.5,setup["sl2"]/2), setup["sm1"], setup["sm2"], setup["sm3"], pm_space)
+    leg = sim.Leg(centres["lc"], (0, - setup["ll1"]/2), (0, setup["ll1"]/2), (0, setup["ll1"]/2), (setup["ll2"], setup["ll1"]/2), setup["lm1"], setup["lm2"], pm_space)
+    torso = sim.Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2, pm_space)
     
     #fixed joints of simulation
-    back = sim.Pinjoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
-    front = sim.Pinjoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
-    bottom = sim.Pinjoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
-    top = sim.Pinjoint(sim.background, rod.body, setup["bg"], (0,-setup["rl"]/2))
+    back = sim.Pinjoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2), pm_space)
+    front = sim.Pinjoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2), pm_space)
+    bottom = sim.Pinjoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2), pm_space)
+    top = sim.Pinjoint(background, rod.body, setup["bg"], (0,-setup["rl"]/2), pm_space)
 
     
     #motors at 0 speed:
-    backmotor = sim.Simplemotor(swing.body, leg.body, 0)
-    frontmotor = sim.Simplemotor(swing.body, torso.body, 0)
+    # topmotor = sim.Simplemotor(background, rod.body, 0, pm_space)
+    # bottom = sim.Simplemotor(rod.body, swing.body, 0, pm_space)
+    backmotor = sim.Simplemotor(swing.body, leg.body, 0, pm_space)
+    frontmotor = sim.Simplemotor(swing.body, torso.body, 0, pm_space)
+
     
-    return {"pm_space":sim.space}
+    return {"pm_space":pm_space}
 
 def perform_action(action,simulation_data):
-    if action[1] != 0 and abs(action[0]) >= abs(sim.angle()) :
-        remove_motor_l()
-        add_motor_l(action[1])
+    if action[1] != 0 and abs(action[0]-sim.angle()) >= 0.01 :
+        pass
+        # remove_motor_l()
+        # add_motor_l(action[1])
     else:
-        remove_motor_l()
-        add_motor_l(0)
-
+        # remove_motor_l()
+        # add_motor_l(0)
+        pass
     return simulation_data
 
 def add_motor0(simulation_data):
@@ -124,7 +133,7 @@ def get_action_from_keypress(keytouple):
     impulse = False
     if keytouple[pygame.K_SPACE]:
         impulse = True
-    return np.array([impulse])
+    return np.array([0, 0, 0, impulse])
 
 # Fetch pygame events
 def get_events():
