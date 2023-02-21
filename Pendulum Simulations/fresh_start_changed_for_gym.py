@@ -15,7 +15,8 @@ import numpy as np
 from PIL import Image
 from pymunk.pygame_util import DrawOptions
 
-
+space = pymunk.Space()
+background = space.static_body
 
 def angle(x1, x2, y1, y2, theta=0, phi=0):
     'angle between two points, can take away other angles to make it relative to other component'
