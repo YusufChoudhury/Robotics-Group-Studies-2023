@@ -68,8 +68,8 @@ USE THE CODE BELOW - THINK ITS GONNA MOVE LEGS FORWARD AND BACK SIMULTANEOUSLY
     # angles and the number of times must be the same for each joint.
     # Here, the second joint ("HeadPitch") has three angles, and
     # three corresponding times.
-    angleLists  = [[-30.0*almath.TO_RAD, 30.0*almath.TO_RAD, 0.0],
-                   [-30.0*almath.TO_RAD, 30.0*almath.TO_RAD, 0.0]]
+    angleLists  = [[-0.09, 2.00, 0.0],
+                   [-0.09, 2.00, 0.0]]
     timeLists   = [[1.0, 2.0, 3.0], [ 1.0, 2.0, 3.0]]
     isAbsolute  = True
     motionProxy.angleInterpolation(names, angleLists, timeLists, isAbsolute)
