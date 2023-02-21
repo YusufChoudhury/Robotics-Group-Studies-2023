@@ -4,7 +4,7 @@ By Hal - 2023
 """
 
 # Import relevent libraries
-import fresh_start_changed_for_gym as sim
+import sim_for_gym as sim
 import pygame
 import numpy as np
 import pymunk
@@ -19,7 +19,7 @@ class CustomEnv(gym.Env):
         self.simulation_data = setup_simulation()
 
     # The actual bit where the simulation happens
-    def step(self, action=np.zeros((1), dtype=np.single)):
+    def step(self, action=np.zeros((4), dtype=np.single)):
         self.simulation_data = perform_action(action,self.simulation_data)
         self.simulation_data["pm_space"].step(1/1000)
         observation, reward, done, info = 0., 0., False, {}
@@ -49,11 +49,6 @@ class CustomEnv(gym.Env):
 # FUNCTIONS FOR THE SIMULATION TEAM TO MODIFY WITH THEIR SETUP:
 
 def setup_simulation():
-    
-    motor_active = [False, False]
-    timer = [0, 0]
-    duration = [0, 0]
-    motor_rate = [0, 0]
     
     """lengths - need to be corrected (Nao dimensions)"""
     setup = {
@@ -97,23 +92,18 @@ def setup_simulation():
 
     
     #motors at 0 speed:
-    backmotor = sim.Simplemotor(swing.body, leg.body, motor_rate[0])
-    frontmotor = sim.Simplemotor(swing.body, torso.body, motor_rate[1])
+    backmotor = sim.Simplemotor(swing.body, leg.body, 0)
+    frontmotor = sim.Simplemotor(swing.body, torso.body, 0)
     
-    return {"pm_space":sim.space, "motor_rate":motor_rate, "timer":timer, "duration":duration, "motor_rate":motor_rate}
+    return {"pm_space":sim.space}
 
 def perform_action(action,simulation_data):
-    if simulation_data["motor_vals"][0] != 0:
-        if simulation_data["timer"][0] <= simulation_data["duration"][0]:
-            simulation_data["timer"][0] += 1
-        else:
-            simulation_data["motor_vals"][0] = 0
-            simulation_data = remove_motor0(simulation_data)
+    if action[1] != 0 and abs(action[0]) >= abs(sim.angle()) :
+        remove_motor_l()
+        add_motor_l(action[1])
     else:
-        if action[0] and action[1]:
-            simulation_data["pm_space"] = add_motor0(simulation_data)
-            simulation_data["timer"][0] = 0
-            simulation_data["motor_active"][0] = True
+        remove_motor_l()
+        add_motor_l(0)
 
     return simulation_data
 
