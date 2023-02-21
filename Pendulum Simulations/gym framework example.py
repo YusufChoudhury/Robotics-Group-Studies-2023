@@ -4,7 +4,7 @@ By Hal - 2023
 """
 
 # Import relevent libraries
-import simulation as sim
+import fresh_start_changed_for_gym as sim
 import pygame
 import numpy as np
 import pymunk
@@ -16,7 +16,7 @@ class CustomEnv(gym.Env):
 
     # Initialising the environment - SINGLE SETUP FUNCTION CALL to be written by simulations team:
     def __init__(self, env_config={}):
-        self.simulation_data = setup_simulation({"pivot_position":(400,100),"pendulum_length":100})
+        self.simulation_data = setup_simulation()
 
     # The actual bit where the simulation happens
     def step(self, action=np.zeros((1), dtype=np.single)):
@@ -49,17 +49,14 @@ class CustomEnv(gym.Env):
 # FUNCTIONS FOR THE SIMULATION TEAM TO MODIFY WITH THEIR SETUP:
 
 def setup_simulation():
-    space = pymunk.Space()
-    space.gravity = 0, 981
-    background = space.static_body
     
     motor_active = [False, False]
     timer = [0, 0]
     duration = [0, 0]
     motor_rate = [0, 0]
     
+    """lengths - need to be corrected (Nao dimensions)"""
     setup = {
-        """lengths - need to be corrected (Nao dimensions)"""
         "rl": 151 + 7,
         "sl1": 16,
         "sl2": 19 + 5,
@@ -70,7 +67,6 @@ def setup_simulation():
         
         "bg": (400,200),
         
-        """masses /kg"""
         "rm": 1.235 + 0.381/2,
         "sm1": 0.381/2,
         "sm2": 1.026,
@@ -79,7 +75,7 @@ def setup_simulation():
         "lm2": 0.162*2 + 0.134,
         "tm": 1.050 + 0.064 + 0.605 + 0.075 + 0.070,
     }
-    
+    print(setup)
     centres = {
         "rc": (setup["bg"][0], setup["bg"][1] + setup["rl"]/2),
         "sc": (setup["bg"][0], setup["bg"][1] + setup["rl"] + setup["sl2"]/2),
@@ -94,41 +90,40 @@ def setup_simulation():
     torso = sim.Torso(centres["tc"], (0,-setup["tl"]/2), (0,setup["tl"]/2), 2)
     
     #fixed joints of simulation
-    back = sim.PinJoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
-    front = sim.PinJoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
-    bottom = sim.PinJoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
-    top = sim.PinJoint(background, rod.body, setup["bg"], (0,-setup["r2"]/2))
+    back = sim.Pinjoint(swing.body, torso.body, (-setup["sl3"]/2 -0.5,setup["sl2"]/2), (0,setup["tl"]/2))
+    front = sim.Pinjoint(swing.body, leg.body, (setup["sl3"]/2 -0.5,setup["sl2"]/2), (0, -setup["ll1"]/2))
+    bottom = sim.Pinjoint(rod.body, swing.body, (0,setup["rl"]/2), (0,-setup["sl2"]/2))
+    top = sim.Pinjoint(sim.background, rod.body, setup["bg"], (0,-setup["rl"]/2))
 
-    motor_vals = [0, 0]
     
     #motors at 0 speed:
-    backmotor = sim.Simplemotor(swing.body, leg.body, motor_vals[0])
-    frontmotor = sim.Simplemotor(swing.body, torso.body, motor_vals[1])
+    backmotor = sim.Simplemotor(swing.body, leg.body, motor_rate[0])
+    frontmotor = sim.Simplemotor(swing.body, torso.body, motor_rate[1])
     
-    return {"pm_space":space, "motor_vals":motor_vals, "timer":timer, "duration":duration, "motor_rate":motor_rate}
+    return {"pm_space":sim.space, "motor_rate":motor_rate, "timer":timer, "duration":duration, "motor_rate":motor_rate}
 
 def perform_action(action,simulation_data):
-    if simulation_data["motor_vals"[0]] != 0:
-        if simulation_data["timer"[0]] <= simulation_data["duration"[0]]:
-            simulation_data["timer"[0]] += 1
+    if simulation_data["motor_vals"][0] != 0:
+        if simulation_data["timer"][0] <= simulation_data["duration"][0]:
+            simulation_data["timer"][0] += 1
         else:
-            simulation_data["motor_vals"[0]] = 0
+            simulation_data["motor_vals"][0] = 0
             simulation_data = remove_motor0(simulation_data)
     else:
         if action[0] and action[1]:
-            simulation_data = add_motor0(simulation_data)
-            simulation_data["timer"[0]] = 0
-            simulation_data["motor_active"[0]] = True
+            simulation_data["pm_space"] = add_motor0(simulation_data)
+            simulation_data["timer"][0] = 0
+            simulation_data["motor_active"][0] = True
 
     return simulation_data
 
 def add_motor0(simulation_data):
-    simulation_data["motor"[0]] = pymunk.SimpleMotor(simulation_data["pm_space"[12]],simulation_data["pm_space"[6]], simulation_data["motor_rate"[0]])
+    simulation_data["motor"][0] = pymunk.SimpleMotor(simulation_data["pm_space"][12],simulation_data["pm_space"[6]], simulation_data["motor_rate"][0])
     simulation_data["pm_space"].add(simulation_data["motor"])
     return simulation_data
 
 def remove_motor0(simulation_data):
-    simulation_data["pm_space"].remove(simulation_data["motor"])
+    simulation_data["pm_space"].remove(simulation_data["pm_space"][16]  )
     return simulation_data
 
 
