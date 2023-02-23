@@ -1,5 +1,5 @@
 # Import relevent libraries
-from Sim_V1 import setup_simulation, perform_action, get_action
+from Sim import setup_simulation, perform_action, get_action
 import pygame
 import numpy as np
 import gym
@@ -18,8 +18,8 @@ class CustomEnv(gym.Env):
         self.run_time = 0
         self.reward = 0
 
-        self.action_space = spaces.Box(0, 1, (1,), dtype=int)
-        self.observation_space = spaces.Box(np.array([-np.pi, -10]), np.array([np.pi, 10]), (2,), dtype=np.float32)
+        self.action_space = spaces.Box(np.array([-10, -10]), np.array([10, 10]), dtype=float)
+        self.observation_space = spaces.Box(np.array([-180, -180, -180, -180, -10, -10, -10, -10]), np.array([180, 180, 180, 180, 10, 10, 10, 10]), dtype=np.float32)
 
         self.simulation_data = setup_simulation()
 
@@ -58,14 +58,28 @@ class CustomEnv(gym.Env):
 
     def get_obs(self):
         leg_angle = 900 * (self.simulation_data["pm_space"].bodies[3].angle -self.simulation_data["pm_space"].bodies[1].angle)
+        leg_angle_velocity = 900 * (self.simulation_data["pm_space"].bodies[3].angular_velocity -self.simulation_data["pm_space"].bodies[1].angular_velocity)
+        
         torso_angle = 900 * (self.simulation_data["pm_space"].bodies[2].angle -self.simulation_data["pm_space"].bodies[1].angle)
+        torso_angle_velocity = 900 * (self.simulation_data["pm_space"].bodies[2].angular_velocity -self.simulation_data["pm_space"].bodies[1].angular_velocity)
+        
         top_angle = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angle)
-        combined_joint_angle = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angle - self.simulation_data["pm_space"].bodies[1].angle)
-        return np.array([leg_angle,torso_angle,top_angle,combined_joint_angle])
+        top_angle_velocity = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angular_velocity)
 
-    def get_reward(self,observation):
-        R,P,E = None, None, None
-        return R - P - E
+        combined_joint_angle = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angle - self.simulation_data["pm_space"].bodies[1].angle)
+        combined_joint_angle_vel = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angular_velocity - self.simulation_data["pm_space"].bodies[1].angular_velocity)
+        
+        return np.array([leg_angle, torso_angle, top_angle, combined_joint_angle, leg_angle_velocity, torso_angle_velocity, top_angle_velocity, combined_joint_angle_vel])
+
+    def get_reward(self, observation):
+        leg_angle, torso_angle, top_angle, combined_joint_angle, _, _, _, _ = observation
+        reward = top_angle * top_angle
+        penalty = combined_joint_angle * combined_joint_angle
+
+        print(self.simulation_data["pm_space"].bodies[3].angular_acceleration)
+
+        effort = 0
+        return reward - penalty - effort
 
     def get_info(self):
         return {"empty":None}
