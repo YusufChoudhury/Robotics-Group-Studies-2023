@@ -124,4 +124,30 @@ def main():
         environment.step(action)
         environment.render()
 
-main()
+#main()
+
+# --------------------------------------------------------------------
+# PPO stuff
+
+def PPO_main():
+    env = CustomEnv()
+    model = PPO("MlpPolicy",env,verbose=1)
+    model.learn(total_timesteps=100000)
+    model.save("test_PPO_model_data")
+    print("model saved\n---------------------------------------------------------")
+    del model
+
+    model = PPO.load("test_PPO_model_data")
+    print("model loaded\n---------------------------------------------------------")
+    obs = env.reset()
+    print("initialising renderer")
+    env.init_render()
+    print("starting while loop (running the trained model)")
+    while True:
+        action, _states = model.predict(obs)
+        print("action:",action)
+        obs, rewards, done, info = env.step(action)
+        print("observation:",obs,"rewards:",rewards)
+        env.render()
+
+PPO_main()
