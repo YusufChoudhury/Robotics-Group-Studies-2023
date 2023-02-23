@@ -17,8 +17,6 @@ class CustomEnv(gym.Env):
     def step(self, action=np.zeros((4), dtype=np.single)):
         self.simulation_data = perform_action(self, action, self.simulation_data)
         self.simulation_data["pm_space"].step(1 / 1000)
-        self.leg_angle = 900 * (self.simulation_data["pm_space"].bodies[3].angle - self.simulation_data["pm_space"].bodies[1].angle)
-        self.torso_angle = 900 * (self.simulation_data["pm_space"].bodies[2].angle - self.simulation_data["pm_space"].bodies[1].angle)
         
         observation, reward, done, info = 0., 0., False, {}
         return observation, reward, done, info
