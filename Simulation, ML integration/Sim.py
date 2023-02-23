@@ -172,25 +172,43 @@ def setup_simulation():
     return {"pm_space": pm_space, "motors": motors, "bodies": bodies, "joints": joints}
 
 def perform_action(environment, action, simulation_data):
-    if action[1] != 0 and abs(action[0] - environment.leg_angle) >= 0.01:
-        pass
+    leg_angle = 900 * (environment.simulation_data["pm_space"].bodies[3].angle - environment.simulation_data["pm_space"].bodies[1].angle)
+    torso_angle = 900 * (environment.simulation_data["pm_space"].bodies[2].angle - environment.simulation_data["pm_space"].bodies[1].angle)
+    if action[1] != 0 and abs(action[0] - leg_angle) >= 1:
         remove_motor_l(simulation_data)
         add_motor_l(simulation_data, action[1])
     else:
         remove_motor_l(simulation_data)
         add_motor_l(simulation_data, 0)
-        pass
+        
+    if action[3] != 0 and abs(action[2] - torso_angle) >= 1:
+        remove_motor_t(simulation_data)
+        add_motor_t(simulation_data, action[3])
+    else:
+        remove_motor_t(simulation_data)
+        add_motor_t(simulation_data, 0)
     return simulation_data
 
 def add_motor_l(simulation_data, speed):
     simulation_data["motors"]["front"] = Simplemotor(simulation_data["bodies"]["swing"].body,
-                                                         simulation_data["bodies"]["leg"].body, speed,
-                                                         simulation_data["pm_space"])
+                                                     simulation_data["bodies"]["leg"].body, speed,
+                                                     simulation_data["pm_space"])
 
 def remove_motor_l(simulation_data):
     simulation_data["motors"]["front"] = Simplemotor(simulation_data["bodies"]["swing"].body,
-                                                         simulation_data["bodies"]["leg"].body, 0,
-                                                         simulation_data["pm_space"])
+                                                     simulation_data["bodies"]["leg"].body, 0,
+                                                     simulation_data["pm_space"])
+    
+def add_motor_t(simulation_data, speed):
+    simulation_data["motors"]["back"] = Simplemotor(simulation_data["bodies"]["swing"].body,
+                                                     simulation_data["bodies"]["torso"].body, speed,
+                                                     simulation_data["pm_space"])
+
+def remove_motor_t(simulation_data):
+    simulation_data["motors"]["back"] = Simplemotor(simulation_data["bodies"]["swing"].body,
+                                                     simulation_data["bodies"]["torso"].body, 0,
+                                                     simulation_data["pm_space"])
+
 
 # ---------------------------------------------------------------------------------------------------------------------
 # manual actions from keypresses:
@@ -198,12 +216,23 @@ def remove_motor_l(simulation_data):
 def get_action(keytouple):
     # FOR MANUAL CONTROL OF THE SIMULATION (RETURN ACTION ARRAYS FROM KEY PRESSES)
 
-    if keytouple[pygame.K_LEFTBRACKET]:
-        return np.array([90, 1, 0, 0])
+    if keytouple[pygame.K_l]:
+        leg_action = np.array([-90, 5, 0, 0])
 
-    elif keytouple[pygame.K_RIGHTBRACKET]:
-        return np.array([-90, -1, 0, 0])
+    elif keytouple[pygame.K_j]:
+        leg_action = np.array([90, -5, 0, 0])
 
     else:
-        return np.array([0, 0, 0, 0])
+        leg_action = np.array([0, 0, 0, 0])
+        
+    if keytouple[pygame.K_d]:
+        torso_action = np.array([0, 0, -90, 5])
+
+    elif keytouple[pygame.K_a]:
+        torso_action = np.array([0, 0, 90, -5])
+
+    else:
+        torso_action = np.array([0, 0, 0, 0])
+    
+    return leg_action + torso_action
 
