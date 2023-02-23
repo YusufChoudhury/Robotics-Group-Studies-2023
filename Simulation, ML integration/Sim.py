@@ -65,8 +65,6 @@ class Simplemotor:
         self.body2 = body2
         self.simplemotor = pymunk.SimpleMotor(self.body1, self.body2, self.rate)
         space.add(self.simplemotor)
-    def remove(self):
-        space.remove(self.simplemotor)
 
 class Pinjoint:
     def __init__(self, body1, body2, con1, con2, space):
@@ -178,17 +176,13 @@ def perform_action(environment, action, simulation_data):
     print("leg angle:", leg_angle)
     print("torso angle:", torso_angle)
     if action[1] != 0 and abs(action[0] - leg_angle) >= 1:
-        remove_motor_l(simulation_data)
         add_motor_l(simulation_data, action[1])
     else:
-        remove_motor_l(simulation_data)
         add_motor_l(simulation_data, 0)
         
     if action[3] != 0 and abs(action[2] - torso_angle) >= 1:
-        remove_motor_t(simulation_data)
         add_motor_t(simulation_data, action[3])
     else:
-        remove_motor_t(simulation_data)
         add_motor_t(simulation_data, 0)
     return simulation_data
 
@@ -197,20 +191,12 @@ def add_motor_l(simulation_data, speed):
                                                      simulation_data["bodies"]["leg"].body, speed,
                                                      simulation_data["pm_space"])
 
-def remove_motor_l(simulation_data):
-    simulation_data["motors"]["front"] = Simplemotor(simulation_data["bodies"]["swing"].body,
-                                                     simulation_data["bodies"]["leg"].body, 0,
-                                                     simulation_data["pm_space"])
     
 def add_motor_t(simulation_data, speed):
     simulation_data["motors"]["back"] = Simplemotor(simulation_data["bodies"]["swing"].body,
                                                      simulation_data["bodies"]["torso"].body, speed,
                                                      simulation_data["pm_space"])
 
-def remove_motor_t(simulation_data):
-    simulation_data["motors"]["back"] = Simplemotor(simulation_data["bodies"]["swing"].body,
-                                                     simulation_data["bodies"]["torso"].body, 0,
-                                                     simulation_data["pm_space"])
 
 
 # ---------------------------------------------------------------------------------------------------------------------
