@@ -3,6 +3,8 @@ This file should:
 - be written in python 2.7 syntax
 - take the "action" from the "Controller.py" instance running on the lab PC and convert it into movement on NAO using the naoqi API.
 - retrieve information from NAO about the angle and send it to the "Controller.py"
+
+NOTE: WHEN WRITING THIS PROGRAM PLEASE RE-UPLOAD TO THE GITHUB AS Control_API_V1.py and increment as needed
 """
 
 import socket
