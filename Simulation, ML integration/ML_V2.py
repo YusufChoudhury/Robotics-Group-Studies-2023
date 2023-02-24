@@ -15,13 +15,13 @@ class CustomEnv(gym.Env):
 
     # Initialising the environment - SINGLE SETUP FUNCTION CALL to be written by simulations team:
     def __init__(self, env_config={}):
-        self.run_duration = 30000
+        self.run_duration = 1000000
         self.run_time = 0
         self.reward = 0
         self.step_length = 1 / 1000
         self.observation = np.zeros(12)
 
-        self.action_space = spaces.Box(np.array([-10, -10]), np.array([10, 10]), dtype=float)
+        self.action_space = spaces.Box(np.array([-10, -10, -10, -10]), np.array([10, 10, 10, 10]), dtype=float)
         self.observation_space = spaces.Box(np.array([-180, -180, -180, -180, -10, -10, -10, -10, -10, -10, -10, -10]), np.array([180, 180, 180, 180, 10, 10, 10, 10, 10, 10, 10, 10]), dtype=np.float32)
 
         self.simulation_data = setup_simulation()
@@ -76,6 +76,7 @@ class CustomEnv(gym.Env):
         combined_joint_angle = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angle - self.simulation_data["pm_space"].bodies[1].angle)
         combined_joint_angle_velocity = 180 / np.pi * (self.simulation_data["pm_space"].bodies[0].angular_velocity - self.simulation_data["pm_space"].bodies[1].angular_velocity)
         combined_joint_angle_acc = (combined_joint_angle_velocity - self.observation[7]) / self.step_length
+
         observation = np.array([leg_angle, torso_angle, top_angle, combined_joint_angle, leg_angle_velocity, torso_angle_velocity, top_angle_velocity, combined_joint_angle_velocity, leg_angle_acc, torso_angle_acc, top_angle_acc, combined_joint_angle_acc])
 
         return observation
