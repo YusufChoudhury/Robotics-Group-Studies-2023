@@ -4,6 +4,8 @@ This program should:
 - recieve the NAO info about its own joint angles
 - give this information to the trained ML agent and save its decision / action
 - send the action to the computer communicating with NAO
+
+NOTE: WHEN WRITING THIS PROGRAM PLEASE RE-UPLOAD TO THE GITHUB AS Controller_V1.py and increment as needed
 """
 
 from stable_baselines3 import PPO
