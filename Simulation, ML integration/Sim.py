@@ -199,38 +199,46 @@ def perform_action(environment, action, simulation_data):
     #print(abs(action[0] - leg_angle))
     print(environment.simulation_data["speeds"][0])
     
-    if abs(action[0] - leg_angle) >= 1:
+    if abs(action[0] - leg_angle) >= 5:
         if environment.simulation_data["speeds"][0] == action[1]:
             pass
         elif environment.simulation_data["speeds"][0] < action[1]:
             environment.simulation_data["speeds"][0] += acceleration
         elif environment.simulation_data["speeds"][0] > action[1]:
             environment.simulation_data["speeds"][0] -= acceleration
-    else:
+            
+    elif abs(action[0] - leg_angle) >= 1:
         if environment.simulation_data["speeds"][0] > 0.1:
               environment.simulation_data["speeds"][0] -= acceleration
         elif environment.simulation_data["speeds"][0] < -0.1:
               environment.simulation_data["speeds"][0] += acceleration
         else:
             environment.simulation_data["speeds"][0] = 0
-                 
+            
+    else:
+        environment.simulation_data["speeds"][0] = 0
+        
     add_motor_l(simulation_data, environment.simulation_data["speeds"][0])
     
     
-    if abs(action[2] - torso_angle) >= 1:
+    if abs(action[2] - torso_angle) >= 5:
         if environment.simulation_data["speeds"][1] == action[3]:
             pass
         elif environment.simulation_data["speeds"][1] < action[3]:
             environment.simulation_data["speeds"][1] += acceleration
         elif environment.simulation_data["speeds"][1] > action[3]:
             environment.simulation_data["speeds"][1] -= acceleration
-    else:
+            
+    elif abs(action[2] - torso_angle) >= 1:
         if environment.simulation_data["speeds"][1] > 0.1:
               environment.simulation_data["speeds"][1] -= acceleration
         elif environment.simulation_data["speeds"][1] < -0.1:
               environment.simulation_data["speeds"][1] += acceleration
         else:
             environment.simulation_data["speeds"][1] = 0
+            
+    else:
+        environment.simulation_data["speeds"][1] = 0
          
     add_motor_t(simulation_data, environment.simulation_data["speeds"][1])
     
@@ -256,19 +264,19 @@ def get_action(keytouple):
     # FOR MANUAL CONTROL OF THE SIMULATION (RETURN ACTION ARRAYS FROM KEY PRESSES)
 
   if keytouple[pygame.K_l]:
-        leg_action = np.array([-90, 1, 0, 0])
+        leg_action = np.array([-90, 6, 0, 0])
 
     elif keytouple[pygame.K_j]:
-        leg_action = np.array([45, -1, 0, 0])
+        leg_action = np.array([45, -6, 0, 0])
 
     else:
         leg_action = np.array([0, 0, 0, 0])
         
     if keytouple[pygame.K_d]:
-        torso_action = np.array([0, 0, -60, 1])
+        torso_action = np.array([0, 0, -60, 6])
 
     elif keytouple[pygame.K_a]:
-        torso_action = np.array([0, 0, 45, -1])
+        torso_action = np.array([0, 0, 45, -6])
 
     else:
         torso_action = np.array([0, 0, 0, 0])
