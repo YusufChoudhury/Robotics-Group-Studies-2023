@@ -73,7 +73,7 @@ class Pinjoint:
         space.add(joint)
 
 class Swing:
-    def __init__(self,pos, a1, b1, a2, b2, a3, b3, m1, m2, m3, space, radius=10):
+    def __init__(self,pos, a1, b1, a2, b2, a3, b3, a4, b4, m1, m2, m3, m4, space):
         'position of CoM, a=start, b=end, m=mass, 1/2/3=bar/vertical/base'
         self.body = pymunk.Body()
         self.body.position = pos
@@ -83,25 +83,32 @@ class Swing:
         s2 = pymunk.Segment(self.body, a2, b2, radius=3)#vertical
         s2.filter = pymunk.ShapeFilter(group = 1)
         s2.mass = m2
-        s3 = pymunk.Segment(self.body, a3, b3, radius=3)#base
+        s3 = pymunk.Segment(self.body, a3, b3, radius=2)#base
         s3.filter = pymunk.ShapeFilter(group = 1)
         s3.mass = m3
-        space.add(self.body, s1,s2,s3)
+        s4 = pymunk.Segment(self.body, a4, b4, radius=3)#upper leg
+        s4.filter = pymunk.ShapeFilter(group = 1)
+        s4.mass = m4
+        s4.color = (0, 255, 0, 0)
+        space.add(self.body, s1,s2,s3,s4)
 
 class Torso:
-    def __init__(self, pos, a, b, m, space, radius=3):
-        'position of CoM, a=start, b=end, m=mass'
+    def __init__(self, pos, a1, b1, r2, a2, m1, m2, space):
+        'position of CoM, a1= torso start, b1=torso end, r2=head radius, a2=head offset, m=mass'
         self.body = pymunk.Body()
         self.body.position = pos
-        self.radius = radius
-        self.a = a
-        self.b = b
+        self.a1 = a1
+        self.b1 = b1
         self.body.center_of_gravity = (0,0)
-        self.torso= pymunk.Segment(self.body, self.a, self.b , radius=radius)
+        self.torso = pymunk.Segment(self.body, self.a1, self.b1 , radius=3)
         self.torso.filter = pymunk.ShapeFilter(group = 1)
-        self.torso.mass = m
+        self.torso.mass = m1
         self.torso.color = (255, 0, 0, 0)
-        space.add(self.body, self.torso)
+        self.head = pymunk.Circle(self.body, r2, a2)
+        self.head.mass = m2
+        self.head.filter = pymunk.ShapeFilter(group = 1)
+        self.head.color = (255, 0, 0, 0)
+        space.add(self.body, self.torso, self.head)
 
 #----------------------------------------------------------------------------------------------------------------------
 # FUNCTIONS FOR USE IN THE GYM ENVIRONMENT (PREVIOUSLY WITHIN GYM WITH SIM):
@@ -117,9 +124,13 @@ def setup_simulation():
         "sl1": 16,
         "sl2": 19 + 5,
         "sl3": 17,
+        "sl4": [8,10],
         "ll1": 16,
         "ll2": 6,
-        "tl": 26,
+        "tl": 18.5,
+        "a1": 10,
+        "a2": 10,
+        "a3": 30,
 
         "bg": (400, 200),
 
@@ -128,32 +139,42 @@ def setup_simulation():
         "sm1": 0.381 / 2,
         "sm2": 1.026,
         "sm3": 0.131 * 2 + 0.070 + 0.390 * 2,
+        "sm4": 0.5,
         "lm1": 0.292 * 2 + 0.134,
         "lm2": 0.162 * 2 + 0.134,
-        "tm": 1.050 + 0.064 + 0.605 + 0.075 + 0.070,
+        "tm": 1.050 + 0.064 + 0.075 + 0.070,
+        "head": 0.605
     }
     centres = {
         "rc": (setup["bg"][0], setup["bg"][1] + setup["rl"] / 2),
         "sc": (setup["bg"][0], setup["bg"][1] + setup["rl"] + setup["sl2"] / 2),
         "lc": (setup["bg"][0] + setup["sl3"] / 2, setup["bg"][1] + setup["rl"] + setup["sl2"] + setup["ll1"] / 2),
-        "tc": (setup["bg"][0] - setup["sl3"] / 2, setup["bg"][1] + setup["rl"] + setup["sl2"] - setup["tl"] / 2),
+        "tc": (setup["bg"][0] - setup["sl3"] / 2, setup["bg"][1] + setup["rl"] + setup["sl2"] - setup["tl"] / 2 -0.25),
+        
+        "hip": (setup["bg"][0] , setup["bg"][1] + setup["rl"] + setup["sl2"] - setup["sl4"][0] /2),
+        "a1c": (setup["bg"][0] - setup["sl3"] / 2, setup["bg"][1] + setup["rl"] + setup["sl2"] - setup["tl"] / 2)
     }
 
     # these add the object to the simulation
     bodies = {
         "rod": Rod(centres["rc"], (0, setup["rl"] / 2), (0, -setup["rl"] / 2), setup["rm"], pm_space),
-        "swing": Swing(centres["sc"], (0, -setup["sl2"] / 2), (setup["sl1"] / 2, -setup["sl2"] / 2),
-                           (0, setup["sl2"] / 2), (0, -setup["sl2"] / 2), (-setup["sl3"] / 2 - 0.5, setup["sl2"] / 2),
-                           (setup["sl3"] / 2 - 0.5, setup["sl2"] / 2), setup["sm1"], setup["sm2"], setup["sm3"],
-                           pm_space),
+        "swing": Swing(centres["sc"],
+                           (0, -setup["sl2"] / 2), (setup["sl1"] / 2, -setup["sl2"] / 2),#a1,b1
+                           (0, setup["sl2"] / 2), (0, -setup["sl2"] / 2),#a2,b2
+                           (-setup["sl3"] / 2 - 0.5, setup["sl2"] / 2), (setup["sl3"] / 2 - 0.5, setup["sl2"] / 2),#a3,b3
+                           (0 , setup["sl2"] / 2 - setup["sl4"][0] /2), (setup["sl4"][1], setup["sl2"] / 2 - setup["sl4"][0] /2),#a4,b4
+                           setup["sm1"], setup["sm2"], setup["sm3"],
+                           setup["sm4"], pm_space),
         "leg": Leg(centres["lc"], (0, - setup["ll1"] / 2), (0, setup["ll1"] / 2), (0, setup["ll1"] / 2),
                        (setup["ll2"], setup["ll1"] / 2), setup["lm1"], setup["lm2"], pm_space),
-        "torso": Torso(centres["tc"], (0, -setup["tl"] / 2), (0, setup["tl"] / 2), 2, pm_space),
+        "torso": Torso((centres["hip"][0], centres["hip"][1]- setup["tl"] / 2 -0.25),
+                       (0, -setup["tl"] / 2 +0.25), (0, setup["tl"] / 2 -0.25),#a1,b1
+                       6, (0, -2 -setup["tl"] / 2 +0.25), setup["tm"], setup["head"], pm_space),
     }
 
     # fixed joints of simulation
     joints = {
-        "back": Pinjoint(bodies["swing"].body, bodies["torso"].body, (-setup["sl3"] / 2 - 0.5, setup["sl2"] / 2),
+        "back": Pinjoint(bodies["swing"].body, bodies["torso"].body, (0 , setup["sl2"] / 2 - setup["sl4"][0] /2),
                              (0, setup["tl"] / 2), pm_space),
         "front": Pinjoint(bodies["swing"].body, bodies["leg"].body, (setup["sl3"] / 2 - 0.5, setup["sl2"] / 2),
                               (0, -setup["ll1"] / 2), pm_space),
