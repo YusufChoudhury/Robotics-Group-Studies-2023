@@ -8,7 +8,8 @@ This program should:
 NOTE: WHEN WRITING THIS PROGRAM PLEASE RE-UPLOAD TO THE GITHUB AS Controller_V1.py and increment as needed
 """
 
-from stable_baselines3 import PPO  
+from stable_baselines3 import PPO 
+import socket,pickle, Encoders
 
 def connect(angle_info, HOST = '192.168.1.4', PORT = 10000):
     # The server's IP address: 192.168.1.100   For testing on local: 147.188.37.23
@@ -53,6 +54,7 @@ def main():
 
   while True:
     angle_info = pickle.dumps(Encoders.sample(), protocol=0,fix_imports=True)
+    Encoders.close()
     connect(angle_info)
 
 
