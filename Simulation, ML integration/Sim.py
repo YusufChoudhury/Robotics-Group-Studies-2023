@@ -173,6 +173,12 @@ def perform_action(environment, action, simulation_data):
     leg_angle = 180/np.pi * (environment.simulation_data["pm_space"].bodies[2].angle - environment.simulation_data["pm_space"].bodies[1].angle)
     torso_angle = 180/np.pi * (environment.simulation_data["pm_space"].bodies[3].angle - environment.simulation_data["pm_space"].bodies[1].angle)
     
+    # dangle0 = action[1] - simulation_data['motor_vel_acc'][0]#delta angle
+    # tics0 = (action[1] - simulation_data['motor_vel_acc'][0])/action[2]/1000
+    
+    
+    
+    
     print("leg angle:", leg_angle)
     print("torso angle:", torso_angle)
     if action[1] != 0 and abs(action[0] - leg_angle) >= 1:
