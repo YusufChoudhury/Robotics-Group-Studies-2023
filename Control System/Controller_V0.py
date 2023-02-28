@@ -8,20 +8,53 @@ This program should:
 NOTE: WHEN WRITING THIS PROGRAM PLEASE RE-UPLOAD TO THE GITHUB AS Controller_V1.py and increment as needed
 """
 
-from stable_baselines3 import PPO
+from stable_baselines3 import PPO  
+
+def connect(angle_info, HOST = '192.168.1.4', PORT = 10000):
+    # The server's IP address: 192.168.1.100   For testing on local: 147.188.37.23
+     # The port used by the server: 10000
+    # Call this function when you need to send actions to the server
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print((HOST, PORT))
+        s.connect((HOST, PORT))
+        print('has connected')
+        # For use with Python 2.7, change with....as s to s = and un-indent
+        
+        while True:
+            try:
+                from_server = s.recv(1024)
+                commands = pickle.loads(from_server)
+                
+                if  commands == 'q':
+                    break
+                
+                if not from_server:
+                    print ('Disconnecting client...')
+                    break 
+                
+                NAO_info = commands
+                angle_info = angle_info
+                # action, _states = model.predict(angle_info) - Machine learning agent makes the action decisions here
+                action = get_action_DUMMY() # - dummy function to send example actions for testing purposes - should be replaced in final build
+                s.sendall(actions)# Sends back the actions
+                
+            except:
+               break
+            
+        s.close()
 
 
  # --------------------------------------------------------------------------------- main loop
 def main():
-  TCP_connection = TCP_connect(SERVER_IP, PORT_NUMBER)
+ 
+ 
   # model = PPO.load("test_PPO_model_data") - load the trained Machine Learning Agent here
 
   while True:
-    angle_info = get_angle_info()
-    NAO_info = get_NAO_info(TCP_connection)
-    # action, _states = model.predict(angle_info) - Machine learning agent makes the action decisions here
-    action = get_action_DUMMY() # - dummy function to send example actions for testing purposes - should be replaced in final build
-    send(action)
+    angle_info = pickle.dumps(Encoders.sample(), protocol=0,fix_imports=True)
+    connect(angle_info)
+
 
     
 # ----------------------------------------------------------------------------------- comms
