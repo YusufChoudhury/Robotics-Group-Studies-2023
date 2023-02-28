@@ -117,6 +117,7 @@ def setup_simulation():
     pm_space = pymunk.Space()
     pm_space.gravity = 0, 981
     background = pm_space.static_body
+    speeds = [0, 0]
 
     setup = {
         # lengths /cm - innacurate
@@ -188,29 +189,51 @@ def setup_simulation():
         "front": Simplemotor(bodies["swing"].body, bodies["torso"].body, 0, pm_space)
     }
 
-    return {"pm_space": pm_space, "motors": motors, "bodies": bodies, "joints": joints}
+    return {"pm_space": pm_space, "motors": motors, "bodies": bodies, "joints": joints, "speeds": speeds}
 
 def perform_action(environment, action, simulation_data):
     leg_angle = 180/np.pi * (environment.simulation_data["pm_space"].bodies[2].angle - environment.simulation_data["pm_space"].bodies[1].angle)
     torso_angle = 180/np.pi * (environment.simulation_data["pm_space"].bodies[3].angle - environment.simulation_data["pm_space"].bodies[1].angle)
+    acceleration = 0.1
     
-    # dangle0 = action[1] - simulation_data['motor_vel_acc'][0]#delta angle
-    # tics0 = (action[1] - simulation_data['motor_vel_acc'][0])/action[2]/1000
+    #print(abs(action[0] - leg_angle))
+    print(environment.simulation_data["speeds"][0])
     
-    
-    
-    
-    print("leg angle:", leg_angle)
-    print("torso angle:", torso_angle)
-    if action[1] != 0 and abs(action[0] - leg_angle) >= 1:
-        add_motor_l(simulation_data, action[1])
+    if abs(action[0] - leg_angle) >= 1:
+        if environment.simulation_data["speeds"][0] == action[1]:
+            pass
+        elif environment.simulation_data["speeds"][0] < action[1]:
+            environment.simulation_data["speeds"][0] += acceleration
+        elif environment.simulation_data["speeds"][0] > action[1]:
+            environment.simulation_data["speeds"][0] -= acceleration
     else:
-        add_motor_l(simulation_data, 0)
-        
-    if action[3] != 0 and abs(action[2] - torso_angle) >= 1:
-        add_motor_t(simulation_data, action[3])
+        if environment.simulation_data["speeds"][0] > 0.1:
+              environment.simulation_data["speeds"][0] -= acceleration
+        elif environment.simulation_data["speeds"][0] < -0.1:
+              environment.simulation_data["speeds"][0] += acceleration
+        else:
+            environment.simulation_data["speeds"][0] = 0
+                 
+    add_motor_l(simulation_data, environment.simulation_data["speeds"][0])
+    
+    
+    if abs(action[2] - torso_angle) >= 1:
+        if environment.simulation_data["speeds"][1] == action[3]:
+            pass
+        elif environment.simulation_data["speeds"][1] < action[3]:
+            environment.simulation_data["speeds"][1] += acceleration
+        elif environment.simulation_data["speeds"][1] > action[3]:
+            environment.simulation_data["speeds"][1] -= acceleration
     else:
-        add_motor_t(simulation_data, 0)
+        if environment.simulation_data["speeds"][1] > 0.1:
+              environment.simulation_data["speeds"][1] -= acceleration
+        elif environment.simulation_data["speeds"][1] < -0.1:
+              environment.simulation_data["speeds"][1] += acceleration
+        else:
+            environment.simulation_data["speeds"][1] = 0
+         
+    add_motor_t(simulation_data, environment.simulation_data["speeds"][1])
+    
     return simulation_data
 
 def add_motor_l(simulation_data, speed):
