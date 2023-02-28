@@ -82,13 +82,14 @@ class CustomEnv(gym.Env):
         return observation
 
     def get_reward(self, observation):
+        k1,k2,k3,k4,k5,k6,k7 = 1,1,1,1,1,1,1
         top_angle, combined_joint_angle  = observation[2:4]
         leg_acc, torso_acc = observation[7:9]
         reward = top_angle * top_angle
         penalty = combined_joint_angle * combined_joint_angle
 
-        effort = get_effort(self, leg_acc, torso_acc)
-        return reward - penalty - effort
+        effort = get_effort(self, leg_acc, torso_acc,k4,k5,k6,k7)
+        return k1*reward - k2*penalty - k3*effort
 
     def get_info(self):
         return {"empty":None}
