@@ -255,20 +255,20 @@ def add_motor_t(simulation_data, speed):
 def get_action(keytouple):
     # FOR MANUAL CONTROL OF THE SIMULATION (RETURN ACTION ARRAYS FROM KEY PRESSES)
 
-    if keytouple[pygame.K_l]:
-        leg_action = np.array([-90, 5, 0, 0])
+  if keytouple[pygame.K_l]:
+        leg_action = np.array([-90, 1, 0, 0])
 
     elif keytouple[pygame.K_j]:
-        leg_action = np.array([90, -5, 0, 0])
+        leg_action = np.array([45, -1, 0, 0])
 
     else:
         leg_action = np.array([0, 0, 0, 0])
         
     if keytouple[pygame.K_d]:
-        torso_action = np.array([0, 0, -90, 5])
+        torso_action = np.array([0, 0, -60, 1])
 
     elif keytouple[pygame.K_a]:
-        torso_action = np.array([0, 0, 90, -5])
+        torso_action = np.array([0, 0, 45, -1])
 
     else:
         torso_action = np.array([0, 0, 0, 0])
