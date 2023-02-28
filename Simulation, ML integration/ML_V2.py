@@ -15,7 +15,7 @@ class CustomEnv(gym.Env):
 
     # Initialising the environment - SINGLE SETUP FUNCTION CALL to be written by simulations team:
     def __init__(self, env_config={}):
-        self.run_duration = 1000000
+        self.run_duration = 5000
         self.run_time = 0
         self.reward = 0
         self.step_length = 1 / 1000
@@ -29,7 +29,7 @@ class CustomEnv(gym.Env):
     # The actual bit where the simulation happens
     def step(self, action=np.zeros((4), dtype=np.single)):
         self.simulation_data = perform_action(self, action, self.simulation_data)
-        self.simulation_data["pm_space"].step(self.step_length)
+        self.simulation_data["pm_space"].step(self.step_length) # might want to include a bit of random variation to the step duration to help train the agent for running on NAO
 
         observation = self.get_obs()
 
@@ -56,6 +56,8 @@ class CustomEnv(gym.Env):
 
     # Reset the simulation for the next training run (NOT RELEVENT TO SIMULATIONS)
     def reset(self):
+        self.run_time = 0
+        self.reward = 0
         self.simulation_data = setup_simulation()
         observation = self.get_obs()
         return observation
@@ -82,13 +84,14 @@ class CustomEnv(gym.Env):
         return observation
 
     def get_reward(self, observation):
-        k1,k2,k3,k4,k5,k6,k7 = 1,1,1,1,1,1,1
+        k1,k2,k3,k4,k5,k6,k7 = 1000,0.0001,0.0001,0,1,0,1.5
         top_angle, combined_joint_angle  = observation[2:4]
         leg_acc, torso_acc = observation[7:9]
         reward = top_angle * top_angle
         penalty = combined_joint_angle * combined_joint_angle
 
         effort = get_effort(self, leg_acc, torso_acc,k4,k5,k6,k7)
+        #print(effort,reward,penalty)
         return k1*reward - k2*penalty - k3*effort
 
     def get_info(self):
@@ -134,7 +137,7 @@ def main():
 def PPO_main():
     env = CustomEnv()
     model = PPO("MlpPolicy",env,verbose=1)
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=200000)
     model.save("test_PPO_model_data")
     print("model saved\n---------------------------------------------------------")
     del model
